@@ -162,6 +162,52 @@
   .confetti{position:fixed; inset:0; pointer-events:none; z-index:40; overflow:hidden;}
   .confetti span{position:absolute; top:-8vh; font-size:1.8rem; animation:fall linear forwards;}
 
+  /* DEDICATION splash */
+  .dedication{position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center;
+    padding:26px; text-align:center; overflow:hidden;
+    background:linear-gradient(165deg,#FFEBC9 0%, #FFD1C6 52%, #F7B4D2 100%);
+    transition:opacity .55s ease, transform .55s ease;}
+  .dedication.hide{opacity:0; transform:scale(1.04); pointer-events:none;}
+  .ded-hearts{position:absolute; inset:0; pointer-events:none;}
+  .ded-hearts span{position:absolute; bottom:-6vh; font-size:1.6rem; opacity:.7; animation:floatUp linear infinite;}
+  @keyframes floatUp{to{transform:translateY(-115vh) rotate(20deg); opacity:0}}
+  @keyframes heartbeat{0%,100%{transform:scale(1)} 30%{transform:scale(1.18)} 45%{transform:scale(1)}}
+  .ded-card{position:relative; z-index:1; max-width:460px; width:100%; background:rgba(255,255,255,.72);
+    backdrop-filter:blur(4px); border-radius:34px; padding:34px 26px 30px; box-shadow:0 18px 50px rgba(120,50,80,.28);
+    animation:pop .7s ease;}
+  .ded-mascot{font-size:4.4rem; line-height:1; animation:bob 3s ease-in-out infinite;}
+  .ded-eyebrow{font-family:var(--body); font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+    font-size:.9rem; color:#C56A8A; margin-top:10px;}
+  .ded-name{font-family:var(--display); font-weight:700; font-size:2.5rem; line-height:1.05; color:#D6497A; margin:4px 0 14px;}
+  .ded-msg{font-family:var(--body); font-weight:700; font-style:italic; font-size:1.35rem; line-height:1.4; color:#6B3550;}
+  .ded-sign{font-family:var(--body); font-weight:800; font-size:1.05rem; color:#8A5470; margin-top:14px;}
+  .ded-sign .h{display:inline-block; animation:heartbeat 1.6s ease-in-out infinite;}
+  .ded-btn{margin-top:24px; border:none; cursor:pointer; font-family:var(--display); font-weight:700; color:#fff;
+    font-size:1.3rem; padding:16px 34px; border-radius:28px; background:#D6497A; box-shadow:0 7px 0 rgba(120,50,80,.35);}
+  .ded-btn:active{transform:translateY(4px); box-shadow:0 3px 0 rgba(120,50,80,.35);}
+
+  /* SPEAK */
+  .speak-area{flex:1; display:flex; flex-direction:column;}
+  .speak-area #spVisual{margin:6px 0 4px;}
+  .speak-area .flash-emoji{font-size:4.4rem;}
+  .speak-area .swatch{width:110px; height:110px;}
+  .mic-wrap{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; margin-top:8px;}
+  .mic-btn{border:none; cursor:pointer; width:130px; height:130px; border-radius:50%; font-size:3.6rem;
+    background:var(--coral); color:#fff; box-shadow:0 10px 0 rgba(28,58,51,.22); display:flex; align-items:center; justify-content:center;
+    transition:transform .1s ease;}
+  .mic-btn:active{transform:translateY(5px); box-shadow:0 5px 0 rgba(28,58,51,.22);}
+  .mic-btn.listening{background:var(--leaf); animation:pulse 1s ease-in-out infinite;}
+  .mic-btn:disabled{opacity:.55; cursor:default;}
+  @keyframes pulse{0%,100%{box-shadow:0 10px 0 rgba(28,58,51,.22), 0 0 0 0 rgba(63,181,94,.5)} 50%{box-shadow:0 10px 0 rgba(28,58,51,.22), 0 0 0 22px rgba(63,181,94,0)}}
+  .mic-hint{font-family:var(--display); font-weight:600; font-size:1.25rem; color:var(--ink); opacity:.8; text-align:center;}
+  .heard{min-height:26px; font-weight:800; opacity:.55; font-size:1rem; text-align:center;}
+  .skip-btn{border:none; cursor:pointer; background:transparent; color:var(--ink); opacity:.6; font-family:var(--body);
+    font-weight:800; font-size:1.05rem; padding:8px 16px;}
+  .skip-btn:active{opacity:.9;}
+  .unsupported{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    gap:8px; padding:20px; max-width:440px; margin:0 auto; font-weight:700; font-size:1.15rem; line-height:1.5;}
+  .unsupported-emoji{font-size:4rem;}
+
   @media (max-width:420px){
     .title{font-size:2.1rem;}
     .flash-emoji{font-size:6.4rem;}
@@ -177,6 +223,19 @@
 </head>
 <body>
 <div class="sky-deco" id="skyDeco"></div>
+
+<!-- DEDICATION -->
+<div class="dedication" id="dedication">
+  <div class="ded-hearts" id="dedHearts"></div>
+  <div class="ded-card">
+    <div class="ded-mascot">🦜💛</div>
+    <div class="ded-eyebrow">A mi hija</div>
+    <div class="ded-name">Amanda<br>Morales Chacón</div>
+    <p class="ded-msg">Aprende rápido,<br>no crezcas tan rápido.</p>
+    <p class="ded-sign">De tu papá,<br>que te ama mucho <span class="h">💛</span></p>
+    <button class="ded-btn" id="dedBtn">Empezar a jugar 🌴</button>
+  </div>
+</div>
 
 <div class="wrap">
   <div class="topbar">
@@ -204,6 +263,7 @@
     <div class="mode-btns">
       <button class="big-btn" style="background:var(--sky)" id="learnBtn"><span class="ico">📖</span> Aprender</button>
       <button class="big-btn" style="background:var(--mango)" id="playBtn"><span class="ico">🎮</span> Jugar</button>
+      <button class="big-btn" style="background:var(--coral)" id="speakBtn"><span class="ico">🎤</span> Hablar</button>
     </div>
   </section>
 
@@ -235,6 +295,36 @@
         <button class="replay" id="replayBtn">🔊 Repetir</button>
       </div>
       <div class="options" id="options"></div>
+    </div>
+  </section>
+
+  <!-- SPEAK (pronunciation) -->
+  <section class="screen" id="speak">
+    <div class="speak-area">
+      <div class="qbar"><i id="spBarFill"></i></div>
+      <div class="qcount" id="spCount">1 / 10</div>
+      <div class="prompt">
+        <div class="q">Di esta palabra en inglés:</div>
+        <div id="spVisual"></div>
+        <div class="word" id="spWord">Dog</div>
+        <button class="replay" id="spHear">🔊 Escuchar a Pepe</button>
+      </div>
+
+      <div class="mic-wrap">
+        <button class="mic-btn" id="micBtn">🎤</button>
+        <div class="mic-hint" id="micHint">Toca el micrófono y habla</div>
+        <div class="heard" id="spHeard"></div>
+        <button class="skip-btn" id="spSkip">Siguiente ▶</button>
+      </div>
+
+      <!-- shown if the browser can't listen -->
+      <div class="unsupported" id="spUnsupported" hidden>
+        <div class="unsupported-emoji">🦜🎧</div>
+        <p>Esta actividad necesita escuchar el micrófono y funciona en
+        <b>Google Chrome</b> o <b>Safari</b>.</p>
+        <p>Pídele a un adulto que abra el juego en uno de esos navegadores. 🙂</p>
+        <button class="big-btn" style="background:var(--sky); margin-top:18px" id="spBackMode">Volver</button>
+      </div>
     </div>
   </section>
 
@@ -294,6 +384,8 @@ let stars = 0;
 let currentCat = null;
 let learnIdx = 0;
 let quiz = null;
+let speak = null;
+let lastMode = 'quiz';
 
 /* ============ SPEECH ============ */
 let enVoice = null;
@@ -336,7 +428,7 @@ function sfxWin(){ [523,659,784,1047].forEach((f,i)=>tone(f,i*0.12,0.25,'triangl
 function sfxWrong(){ tone(200,0,0.22,'sine',0.14); }
 
 /* ============ NAV ============ */
-const screens = ['home','mode','learn','quiz','win'];
+const screens = ['home','mode','learn','quiz','speak','win'];
 function show(id){
   screens.forEach(s=>document.getElementById(s).classList.toggle('active', s===id));
   const back=document.getElementById('backBtn');
@@ -413,6 +505,7 @@ const RETRY=['¡Casi! Intenta otra vez 💪','¡Ups! Prueba de nuevo 🙂','Mmm.
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]];} return a; }
 
 function startQuiz(){
+  lastMode='quiz';
   const pool=shuffle(currentCat.items);
   const total=Math.min(10, pool.length);
   const questions=pool.slice(0,total).map(target=>{
@@ -497,20 +590,165 @@ function burstConfetti(n){
   }
 }
 
+/* ============ SPEAK (pronunciation with speech recognition) ============ */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog = null, listening = false;
+
+// Common recognizer confusions so kids aren't marked wrong unfairly.
+const ALT = {
+  one:['won','wan'], two:['to','too','tu'], three:['tree','free','thre'], four:['for','fore','foor'],
+  five:['fife'], six:['sicks','sax'], seven:['sevin'], eight:['ate','ait'], nine:['nain'], ten:['tan'],
+  red:['read'], blue:['blew','bloo'], green:['grin'], white:['wite'], black:['blak'], brown:['braun'],
+  eyes:['ice','eye','is','ise'], ear:['year','hear','here'], nose:['knows','no','nos'], mouth:['mouse','mowth'],
+  hand:['and'], foot:['food','fut'], hair:['hare','air','her'], tooth:['tuth','tooss','toof'],
+  dog:['dawg','doug'], cat:['kat'], bird:['burd'], fish:['fis'], cow:['ka','kau'], horse:['hoarse','hors'],
+  frog:['frag'], monkey:['munky'], lion:['line','lyon'], elephant:['elefant'],
+  apple:['aple','appl'], banana:['bnana','banan'], orange:['ornge','oranj'], milk:['melk'], bread:['bred','bret'],
+  egg:['eg'], water:['wader','wata'], cheese:['chees','cheez'], rice:['ris','rise'], cookie:['cooky','cuki'],
+  dad:['dat','dead'], mom:['mam','mum'], boy:['boi'], girl:['gurl','grl'], baby:['babi'],
+  grandpa:['granpa','grampa'], grandma:['granma','gramma'], pet:['pat','pit']
+};
+
+function normalize(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[^\p{L}]/gu,''); }
+function lev(a,b){
+  const m=a.length,n=b.length; if(!m) return n; if(!n) return m;
+  const d=Array.from({length:m+1},(_,i)=>[i,...Array(n).fill(0)]);
+  for(let j=0;j<=n;j++) d[0][j]=j;
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+    d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return d[m][n];
+}
+function isMatch(saidRaw, targetRaw){
+  const target=normalize(targetRaw);
+  const alts=[target, ...((ALT[targetRaw.toLowerCase()]||[]).map(normalize))];
+  // saidRaw can contain several words; test each word and the whole thing
+  const words=(saidRaw||'').split(/\s+/).map(normalize).filter(Boolean);
+  const cands=[normalize(saidRaw), ...words];
+  for(const c of cands){
+    if(!c) continue;
+    for(const t of alts){
+      if(c===t) return true;
+      if(c.includes(t) || t.includes(c)) return true;
+      const tol = t.length<=4 ? 1 : 2;
+      if(lev(c,t)<=tol) return true;
+    }
+  }
+  return false;
+}
+
+function startSpeak(){
+  lastMode='speak';
+  const items = shuffle(currentCat.items);
+  speak = { items, i:0, correct:0, tries:0 };
+  show('speak');
+  const supported = !!SR && window.isSecureContext;
+  document.getElementById('spUnsupported').hidden = supported;
+  document.querySelector('#speak .prompt').style.display = supported ? '' : 'none';
+  document.querySelector('#speak .mic-wrap').style.display = supported ? '' : 'none';
+  document.querySelector('#speak .qbar').style.display = supported ? '' : 'none';
+  document.getElementById('spCount').style.display = supported ? '' : 'none';
+  if(supported) renderSpeak();
+}
+function renderSpeak(){
+  const item=speak.items[speak.i];
+  const vis=document.getElementById('spVisual');
+  vis.innerHTML = item.color
+    ? `<div class="swatch" style="background:${item.color}"></div>`
+    : `<div class="flash-emoji">${item.emoji}</div>`;
+  document.getElementById('spWord').textContent=item.en;
+  document.getElementById('spCount').textContent=`${speak.i+1} / ${speak.items.length}`;
+  document.getElementById('spBarFill').style.width=(speak.i/speak.items.length*100)+'%';
+  document.getElementById('spHeard').textContent='';
+  document.getElementById('micHint').textContent='Toca el micrófono y habla';
+  document.getElementById('micBtn').disabled=false;
+  speak.tries=0;
+  setTimeout(()=>say(item.en), 300); // Pepe says it first
+}
+function listen(){
+  if(!SR || listening) return;
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  try{
+    recog = new SR();
+    recog.lang='en-US'; recog.interimResults=false; recog.maxAlternatives=6; recog.continuous=false;
+    const mic=document.getElementById('micBtn'), hint=document.getElementById('micHint');
+    recog.onstart=()=>{ listening=true; mic.classList.add('listening'); mic.textContent='👂'; hint.textContent='Escuchando… ¡habla!'; };
+    recog.onerror=(e)=>{
+      listening=false; mic.classList.remove('listening'); mic.textContent='🎤';
+      hint.textContent = e.error==='not-allowed'
+        ? 'Necesito permiso del micrófono 🎤'
+        : (e.error==='no-speech' ? 'No te escuché, intenta otra vez 🙂' : 'Ups, intenta de nuevo');
+    };
+    recog.onend=()=>{ listening=false; mic.classList.remove('listening'); mic.textContent='🎤'; };
+    recog.onresult=(ev)=>{
+      const target=speak.items[speak.i].en;
+      const alts=[]; for(let k=0;k<ev.results[0].length;k++) alts.push(ev.results[0][k].transcript);
+      const heard=alts[0]||'';
+      document.getElementById('spHeard').textContent = heard ? `escuché: "${heard}"` : '';
+      const ok = alts.some(a=>isMatch(a,target));
+      if(ok) speakCorrect(); else speakWrong();
+    };
+    recog.start();
+  }catch(e){
+    document.getElementById('micHint').textContent='No se pudo abrir el micrófono';
+  }
+}
+function stopListening(){ if(recog && listening){ try{recog.abort();}catch(e){} } listening=false;
+  const mic=document.getElementById('micBtn'); if(mic){ mic.classList.remove('listening'); mic.textContent='🎤'; } }
+function speakCorrect(){
+  speak.correct++;
+  document.getElementById('micBtn').disabled=true;
+  document.getElementById('micHint').textContent='¡Muy bien dicho! 🎉';
+  sfxGood(); addStars(1); toast(CHEERS[(Math.random()*CHEERS.length)|0],'good'); burstConfetti(16);
+  say(speak.items[speak.i].en);
+  setTimeout(nextSpeak, 1300);
+}
+function speakWrong(){
+  speak.tries++;
+  sfxWrong();
+  const mic=document.getElementById('micBtn');
+  mic.classList.remove('listening'); void mic.offsetWidth;
+  mic.style.animation='shake .5s ease'; setTimeout(()=>mic.style.animation='',500);
+  document.getElementById('micHint').textContent = speak.tries>=2
+    ? 'Escucha a Pepe y repite 👂' : '¡Casi! Intenta otra vez 💪';
+  toast('¡Casi! Escucha e intenta 🦜','bad');
+  setTimeout(()=>say(speak.items[speak.i].en), 400);
+}
+function nextSpeak(){
+  speak.i++;
+  if(speak.i>=speak.items.length) finishSpeak();
+  else renderSpeak();
+}
+function finishSpeak(){
+  document.getElementById('spBarFill').style.width='100%';
+  const total=speak.items.length, got=speak.correct;
+  const ratio=got/total;
+  const earned = ratio>=0.9?3 : ratio>=0.6?2 : ratio>=0.3?1 : 0;
+  document.getElementById('winStars').textContent='⭐'.repeat(earned)+'☆'.repeat(3-earned);
+  document.getElementById('winTitle').textContent = ratio>=0.9?'¡Qué buen inglés! 🏆' : ratio>=0.6?'¡Muy bien hablado! 🎉' : '¡Sigue practicando! 💪';
+  document.getElementById('winScore').textContent=`Dijiste bien ${got} de ${total}`;
+  show('win'); sfxWin(); burstConfetti(40);
+}
+
 /* ============ BUTTON WIRING ============ */
 document.getElementById('backBtn').onclick=()=>{
   const active=screens.find(s=>document.getElementById(s).classList.contains('active'));
   if(active==='mode') show('home');
-  else if(active==='learn'||active==='quiz') show('mode');
+  else if(active==='learn'||active==='quiz'||active==='speak') show('mode');
   else if(active==='win') show('mode');
   else show('home');
+  stopListening();
   if('speechSynthesis' in window) speechSynthesis.cancel();
 };
 document.getElementById('learnBtn').onclick=startLearn;
 document.getElementById('playBtn').onclick=startQuiz;
+document.getElementById('speakBtn').onclick=startSpeak;
 document.getElementById('replayBtn').onclick=()=>say(quiz.questions[quiz.i].target.en);
-document.getElementById('againBtn').onclick=startQuiz;
+document.getElementById('againBtn').onclick=()=>{ if(lastMode==='speak') startSpeak(); else startQuiz(); };
 document.getElementById('otherBtn').onclick=()=>show('home');
+document.getElementById('micBtn').onclick=listen;
+document.getElementById('spHear').onclick=()=>say(speak.items[speak.i].en);
+document.getElementById('spSkip').onclick=()=>{ stopListening(); nextSpeak(); };
+document.getElementById('spBackMode').onclick=()=>show('mode');
 document.getElementById('homeMascot').onclick=()=>{
   const m=document.getElementById('homeMascot');
   m.style.animation='cheer .5s ease'; setTimeout(()=>m.style.animation='bob 3s ease-in-out infinite',500);
@@ -532,6 +770,29 @@ document.getElementById('homeMascot').onclick=()=>{
 })();
 
 buildHome();
+
+/* dedication splash */
+(function(){
+  const box=document.getElementById('dedHearts');
+  const hs=['💛','💗','⭐','🌸','💛'];
+  for(let i=0;i<12;i++){
+    const s=document.createElement('span');
+    s.textContent=hs[(Math.random()*hs.length)|0];
+    s.style.left=(Math.random()*100)+'vw';
+    s.style.fontSize=(1.1+Math.random()*1.4)+'rem';
+    s.style.animationDuration=(5+Math.random()*5)+'s';
+    s.style.animationDelay=(-Math.random()*6)+'s';
+    box.appendChild(s);
+  }
+  function closeDedication(){
+    const d=document.getElementById('dedication');
+    if(d.classList.contains('hide')) return;
+    d.classList.add('hide');
+    setTimeout(()=>{ d.style.display='none'; }, 600);
+    try{ say('Hello Amanda!'); }catch(e){}
+  }
+  document.getElementById('dedBtn').onclick=closeDedication;
+})();
 
 /* PWA: register service worker (offline + installable) */
 if('serviceWorker' in navigator){

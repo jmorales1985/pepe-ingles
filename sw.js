@@ -1,5 +1,5 @@
 /* Pepe habla inglés — service worker */
-const CACHE = 'pepe-ingles-v1';
+const CACHE = 'pepe-ingles-v3';
 const SHELL = [
   './',
   './index.html',
