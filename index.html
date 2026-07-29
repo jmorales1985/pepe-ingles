@@ -190,6 +190,30 @@
     align-items:center; justify-content:center; color:#D6497A;}
   .ded-mute:active{transform:scale(.9);}
 
+  /* RACE */
+  .race-area{flex:1; display:flex; flex-direction:column;}
+  .race-track{position:relative; background:linear-gradient(180deg,#BFEFff 0%, #CFF3C0 100%);
+    border-radius:22px; padding:10px 10px 8px; margin:6px 2px 10px; box-shadow:inset 0 0 0 4px rgba(255,255,255,.5), var(--shadow);
+    overflow:hidden;}
+  .race-track .finish{position:absolute; right:8px; top:6px; bottom:6px; width:34px; display:flex; align-items:center;
+    justify-content:center; font-size:1.7rem; background:repeating-linear-gradient(45deg,#fff,#fff 6px,#2b2b2b 6px,#2b2b2b 12px);
+    border-radius:8px; opacity:.9;}
+  .lane{position:relative; height:52px; margin:4px 44px 4px 4px; border-bottom:3px dashed rgba(28,58,51,.25);}
+  .lane-b{border-bottom:none;}
+  .runner{position:absolute; bottom:2px; left:0; font-size:2.2rem; line-height:1;
+    transition:left .6s cubic-bezier(.34,1.3,.5,1); filter:drop-shadow(0 4px 3px rgba(28,58,51,.25));}
+  .runner.hop{animation:cheer .5s ease;}
+  .race-opts{margin-top:16px;}
+  .ropt{border:none; cursor:pointer; background:var(--cream); border-radius:20px; padding:14px 8px; box-shadow:var(--shadow);
+    display:flex; flex-direction:column; align-items:center; gap:6px; border:5px solid transparent; min-height:104px; justify-content:center;}
+  .ropt:active{transform:scale(.95);}
+  .ropt .rico{font-size:2.4rem; line-height:1;}
+  .ropt .rsw{width:44px; height:44px; border-radius:12px; box-shadow:inset 0 0 0 4px rgba(255,255,255,.6);}
+  .ropt .rword{font-family:var(--display); font-weight:600; font-size:1.15rem;}
+  .ropt.correct{border-color:var(--leaf); background:#E9FBEE;}
+  .ropt.wrong{border-color:var(--coral); background:#FFECEA;}
+  .ropt.dim{opacity:.4;}
+
   /* SPEAK */
   .speak-area{flex:1; display:flex; flex-direction:column;}
   .speak-area #spVisual{margin:6px 0 4px;}
@@ -269,6 +293,7 @@
       <button class="big-btn" style="background:var(--sky)" id="learnBtn"><span class="ico">📖</span> Aprender</button>
       <button class="big-btn" style="background:var(--mango)" id="playBtn"><span class="ico">🎮</span> Jugar</button>
       <button class="big-btn" style="background:var(--coral)" id="speakBtn"><span class="ico">🎤</span> Hablar</button>
+      <button class="big-btn" style="background:var(--leaf)" id="raceBtn"><span class="ico">🏁</span> Carrera</button>
     </div>
   </section>
 
@@ -333,6 +358,24 @@
     </div>
   </section>
 
+  <!-- RACE -->
+  <section class="screen" id="race">
+    <div class="race-area">
+      <div class="qcount" id="rcCount">1 / 10</div>
+      <div class="race-track">
+        <div class="finish">🏁</div>
+        <div class="lane"><span class="runner" id="rcPepe">🦜</span></div>
+        <div class="lane lane-b"><span class="runner" id="rcRival">🐢</span></div>
+      </div>
+      <div class="prompt">
+        <div class="q">Escucha… ¿qué significa?</div>
+        <div class="word" id="rcWord">Dog</div>
+        <button class="replay" id="rcHear">🔊 Repetir</button>
+      </div>
+      <div class="options race-opts" id="rcOptions"></div>
+    </div>
+  </section>
+
   <!-- WIN -->
   <section class="screen" id="win">
     <div class="win">
@@ -390,6 +433,7 @@ let currentCat = null;
 let learnIdx = 0;
 let quiz = null;
 let speak = null;
+let race = null;
 let lastMode = 'quiz';
 
 /* ============ SPEECH ============ */
@@ -450,7 +494,7 @@ function sfxWin(){ [523,659,784,1047].forEach((f,i)=>tone(f,i*0.12,0.25,'triangl
 function sfxWrong(){ tone(200,0,0.22,'sine',0.14); }
 
 /* ============ NAV ============ */
-const screens = ['home','mode','learn','quiz','speak','win'];
+const screens = ['home','mode','learn','quiz','speak','race','win'];
 function show(id){
   screens.forEach(s=>document.getElementById(s).classList.toggle('active', s===id));
   const back=document.getElementById('backBtn');
@@ -772,11 +816,97 @@ function finishSpeak(){
   show('win'); sfxWin(); burstConfetti(40);
 }
 
+/* ============ RACE (hear the word, pick the meaning; Pepe races a turtle) ============ */
+const RC_FINISH = 10;      // meta
+const RC_OPP_STEP = 0.5;   // cuánto avanza la tortuga cuando el niño falla
+function rcOptionHTML(item){
+  const vis = item.color
+    ? `<span class="rsw" style="background:${item.color}"></span>`
+    : `<span class="rico">${item.emoji}</span>`;
+  return `${vis}<span class="rword">${item.es}</span>`;
+}
+function startRace(){
+  lastMode='race';
+  // build exactly 10 questions (repeat items if the category has fewer)
+  let pool=[]; while(pool.length<10) pool=pool.concat(shuffle(currentCat.items));
+  const qs=pool.slice(0,10).map(target=>{
+    const distract=shuffle(currentCat.items.filter(x=>x.en!==target.en)).slice(0,2);
+    return { target, options:shuffle([target,...distract]) };
+  });
+  race={ qs, i:0, correct:0, pepe:0, opp:0, locked:false };
+  placeRunners(false);
+  renderRace();
+  show('race');
+}
+function placeRunners(animate){
+  const p=document.getElementById('rcPepe'), r=document.getElementById('rcRival');
+  const posL=(v)=> (2 + Math.min(v,RC_FINISH)/RC_FINISH*82) + '%';
+  if(!animate){ p.style.transition=r.style.transition='none'; }
+  p.style.left=posL(race.pepe); r.style.left=posL(race.opp);
+  if(!animate){ void p.offsetWidth; p.style.transition=r.style.transition=''; }
+}
+function renderRace(){
+  race.locked=false;
+  const q=race.qs[race.i];
+  document.getElementById('rcCount').textContent=`${race.i+1} / 10`;
+  document.getElementById('rcWord').textContent=q.target.en;
+  const box=document.getElementById('rcOptions');
+  box.innerHTML='';
+  q.options.forEach(item=>{
+    const b=document.createElement('button');
+    b.className='ropt';
+    b.innerHTML=rcOptionHTML(item);
+    b.onclick=()=>chooseRace(b,item,q.target);
+    box.appendChild(b);
+  });
+  setTimeout(()=>say(q.target.en), 300);
+}
+function chooseRace(btn,item,target){
+  if(race.locked) return;
+  race.locked=true;
+  const opts=document.querySelectorAll('#rcOptions .ropt');
+  if(item.en===target.en){
+    race.correct++; race.pepe=Math.min(RC_FINISH, race.pepe+1);
+    btn.classList.add('correct'); sfxGood(); addStars(1);
+    const pepe=document.getElementById('rcPepe'); pepe.classList.add('hop'); setTimeout(()=>pepe.classList.remove('hop'),500);
+    toast('¡Avanza Pepe! '+bravo(),'good'); burstConfetti(10);
+    sayES(bravo());
+    opts.forEach(o=>{ if(o!==btn) o.classList.add('dim'); });
+  }else{
+    race.pepe=Math.max(0, race.pepe-1); race.opp=Math.min(RC_FINISH, race.opp+RC_OPP_STEP);
+    btn.classList.add('wrong'); sfxWrong();
+    toast('¡Uy! Pepe retrocede 🐢','bad');
+    sayES(animo());
+    opts.forEach(o=>{
+      o.classList.add('dim');
+      const w=o.querySelector('.rword');
+      if(w && w.textContent===target.es){ o.classList.remove('dim'); o.classList.add('correct'); }
+    });
+  }
+  placeRunners(true);
+  setTimeout(nextRace, 1300);
+}
+function nextRace(){
+  race.i++;
+  if(race.i>=10) finishRace();
+  else renderRace();
+}
+function finishRace(){
+  const win = race.pepe >= race.opp;
+  document.getElementById('winTitle').textContent = win ? '¡Pepe ganó la carrera! 🏆🦜' : '¡Casi! La próxima ganamos 🐢';
+  document.getElementById('winStars').textContent = '⭐ '+race.correct+' / 10';
+  document.getElementById('winScore').textContent = win
+    ? `¡Pepe llegó primero con ${race.correct} aciertos!`
+    : `Pepe hizo ${race.correct} aciertos. ¡Sigue practicando!`;
+  show('win');
+  if(win){ sfxWin(); burstConfetti(46); } else { sfxGood(); burstConfetti(16); }
+}
+
 /* ============ BUTTON WIRING ============ */
 document.getElementById('backBtn').onclick=()=>{
   const active=screens.find(s=>document.getElementById(s).classList.contains('active'));
   if(active==='mode') show('home');
-  else if(active==='learn'||active==='quiz'||active==='speak') show('mode');
+  else if(active==='learn'||active==='quiz'||active==='speak'||active==='race') show('mode');
   else if(active==='win') show('mode');
   else show('home');
   stopListening();
@@ -786,9 +916,11 @@ document.getElementById('backBtn').onclick=()=>{
 document.getElementById('learnBtn').onclick=startLearn;
 document.getElementById('playBtn').onclick=startQuiz;
 document.getElementById('speakBtn').onclick=startSpeak;
+document.getElementById('raceBtn').onclick=startRace;
 document.getElementById('replayBtn').onclick=()=>say(quiz.questions[quiz.i].target.en);
-document.getElementById('againBtn').onclick=()=>{ if(lastMode==='speak') startSpeak(); else startQuiz(); };
+document.getElementById('againBtn').onclick=()=>{ if(lastMode==='speak') startSpeak(); else if(lastMode==='race') startRace(); else startQuiz(); };
 document.getElementById('otherBtn').onclick=()=>show('home');
+document.getElementById('rcHear').onclick=()=>say(race.qs[race.i].target.en);
 document.getElementById('micBtn').onclick=listen;
 document.getElementById('spHear').onclick=()=>say(speak.items[speak.i].en);
 document.getElementById('spSkip').onclick=()=>{ stopListening(); nextSpeak(); };
