@@ -410,8 +410,9 @@ if('speechSynthesis' in window){
 }
 function mkUtter(text, lang){
   const u = new SpeechSynthesisUtterance(text);
-  if(lang==='es'){ u.lang = esVoice ? esVoice.lang : 'es-ES'; if(esVoice) u.voice=esVoice; u.rate=0.92; u.pitch=1.15; }
-  else { u.lang='en-US'; if(enVoice) u.voice=enVoice; u.rate=0.85; u.pitch=1.1; }
+  // Pepe es un loro: tono alto y cantarín en todas las voces 🦜
+  if(lang==='es'){ u.lang = esVoice ? esVoice.lang : 'es-ES'; if(esVoice) u.voice=esVoice; u.rate=0.95; u.pitch=1.8; }
+  else { u.lang='en-US'; if(enVoice) u.voice=enVoice; u.rate=0.9; u.pitch=1.8; }
   return u;
 }
 function say(text){
@@ -631,7 +632,7 @@ const ALT = {
   grandpa:['granpa','grampa'], grandma:['granma','gramma'], pet:['pat','pit']
 };
 
-function normalize(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[^\p{L}]/gu,''); }
+function normalize(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]/g,''); }
 function lev(a,b){
   const m=a.length,n=b.length; if(!m) return n; if(!n) return m;
   const d=Array.from({length:m+1},(_,i)=>[i,...Array(n).fill(0)]);
@@ -640,19 +641,36 @@ function lev(a,b){
     d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
   return d[m][n];
 }
+// "sounds-like" key so similar-sounding attempts count (forgiving for little kids)
+function soundex(s){
+  s=normalize(s); if(!s) return '';
+  const code={b:'1',f:'1',p:'1',v:'1',c:'2',g:'2',j:'2',k:'2',q:'2',s:'2',x:'2',z:'2',d:'3',t:'3',l:'4',m:'5',n:'5',r:'6'};
+  let out=s[0].toUpperCase(), prev=code[s[0]]||'';
+  for(let i=1;i<s.length;i++){
+    const c=code[s[i]]||'';
+    if(c && c!==prev) out+=c;
+    if(s[i]!=='h' && s[i]!=='w') prev=c;
+  }
+  return (out+'000').slice(0,4);
+}
 function isMatch(saidRaw, targetRaw){
   const target=normalize(targetRaw);
-  const alts=[target, ...((ALT[targetRaw.toLowerCase()]||[]).map(normalize))];
+  if(!target) return false;
+  const alts=[target, ...((ALT[targetRaw.toLowerCase()]||[]).map(normalize))].filter(Boolean);
   // saidRaw can contain several words; test each word and the whole thing
   const words=(saidRaw||'').split(/\s+/).map(normalize).filter(Boolean);
-  const cands=[normalize(saidRaw), ...words];
+  const cands=[normalize(saidRaw), ...words].filter(Boolean);
+  if(!cands.length) return false;
+  const tsx=soundex(target);
   for(const c of cands){
-    if(!c) continue;
+    // phonetic (sounds-like) match against the target — very forgiving
+    if(tsx && soundex(c)===tsx) return true;
     for(const t of alts){
       if(c===t) return true;
-      if(c.includes(t) || t.includes(c)) return true;
-      const tol = t.length<=4 ? 1 : 2;
+      if(c.includes(t) || t.includes(c)) return true;          // said part of the word / word part of said
+      const tol = Math.max(2, Math.ceil(t.length*0.5));         // allow up to ~half the word wrong
       if(lev(c,t)<=tol) return true;
+      if(t.length>=4 && lev(c.slice(0,t.length), t)<=Math.max(2,Math.ceil(t.length*0.4))) return true;
     }
   }
   return false;
@@ -900,7 +918,7 @@ const Music = (function(){
     if(d.classList.contains('hide')) return;
     d.classList.add('hide');
     setTimeout(()=>{ d.style.display='none'; }, 600);
-    Music.duck();                 // lower the volume, keep it playing softly
+    Music.stop();                 // apagar la música al entrar al juego
     try{ say('Hello Amanda!'); }catch(e){}
   }
   document.getElementById('dedBtn').onclick=closeDedication;
